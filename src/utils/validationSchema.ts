@@ -1,3 +1,4 @@
+import { isValidObjectId } from 'mongoose';
 import * as yup from 'yup';
 
 export const CreateUserSchema = yup.object().shape({
@@ -22,3 +23,35 @@ export const CreateUserSchema = yup.object().shape({
             .matches(/[a-z]/, "Password must contain atleast one lowercase letter"),
 });
 
+export const TokenAndIdVerificationBody = yup.object({
+   token: yup.string().trim().required("Invalid Token!"),
+   userId: yup.string().transform(function(value) {
+        if(this.isType(value) && isValidObjectId(value)) {
+          return value;
+        }
+   
+        return "";
+   }).required("Invalid userId!")
+});
+
+export const UpdatePasswordSchema = yup.object({
+        token: yup.string().trim().required("Invalid Token!"),
+        userId: yup.string().transform(function(value) {
+             if(this.isType(value) && isValidObjectId(value)) {
+               return value;
+             }
+        
+             return "";
+        }).required("Invalid userId!"),
+        password: yup.string()
+        .trim()
+        .required("Password is missing!")
+        .min(8, "Password is too short!")
+        .matches(
+            /[!@#$%^&*(),.?":{}|<>]/,
+            "Password must contain atleast one symbol"
+        )
+        .matches(/[0-9]/, "Password must contain atleast one number")
+        .matches(/[A-Z]/, "Password must contain atleast one uppercase letter")
+        .matches(/[a-z]/, "Password must contain atleast one lowercase letter"),
+});
