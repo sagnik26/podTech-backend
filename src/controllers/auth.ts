@@ -1,7 +1,7 @@
 import { User } from "#/models/user.model";
 import { CreateUser, VerifyEmailRequest, generateForgetPassword } from "#/types/user";
 import { RequestHandler, Response } from "express";
-import { generateToken } from "#/utils/helper";
+import { formatProfile, generateToken } from "#/utils/helper";
 import { sendForgetPasswordLink, sendPasswordResetSuccess, sendVerificationMail } from "#/utils/mail";
 import { EmailVerificationToken } from "#/models/emailVerificationToken.model";
 import { isValidObjectId } from "mongoose";
@@ -9,6 +9,8 @@ import { PasswordResetToken } from "#/models/passwordresetToken";
 import crypto from "crypto";
 import { JWT_SECRET, PASSWORD_RESET_LINK } from "#/utils/variables";
 import jwt from "jsonwebtoken";
+import { RequestWithFiles } from "#/middleware/fileParser";
+import cloudinary from "#/cloud";
 
 export const create: RequestHandler = async (req: CreateUser, res: Response) => {
     const { name, email, password } = req.body;
@@ -188,5 +190,53 @@ export const signIn: RequestHandler = async (req, res) => {
       following: user.followings?.length
     },
     token
+  });
+}
+
+export const sendProfile: RequestHandler = async (req, res) => {
+  return res.json({
+    profile: req.user
+  });
+}
+
+export const updateProfile: RequestHandler = async (req: RequestWithFiles, res) => {
+  const { name } = req.body;
+  const avatar = req.files?.avatar;
+
+  const user = await User.findById(req.user.id);
+  if(!user) throw new Error("Something went wrong, user not found!");
+
+  if(typeof name !== "string" || name.length < 3) {
+    return res.status(422).json({
+      error: "Invalid name!"
+    });
+  }
+  user.name = name;
+
+  if(avatar) {
+    // Remove previous avatar if any
+    if(user.avatar?.publicId) {
+      await cloudinary.uploader.destroy(user.avatar?.publicId);
+    }
+
+    // Upload new avatar to Cloudinary
+    const { secure_url, public_id } = await cloudinary.uploader.upload(avatar.filepath, {
+      width: 300,
+      height: 300,
+      crop: "thumb",
+      gravity: "face"
+    });
+
+    // Save inside DB
+    user.avatar = {
+      url: secure_url,
+      publicId: public_id
+    }
+  }
+
+  await user.save();
+
+  res.json({
+    profile: formatProfile(user)
   });
 }
