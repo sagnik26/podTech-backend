@@ -10,5 +10,5 @@ export const MAILTRAP_PORT = env.MAILTRAP_PORT
 export const MAILTRAP_HOST = env.MAILTRAP_HOST
 export const PASSWORD_RESET_LINK = env.PASSWORD_RESET_LINK
 export const SIGN_IN_URL = env.SIGN_IN_URL
-
+export const JWT_SECRET = env.JWT_SECRET
 

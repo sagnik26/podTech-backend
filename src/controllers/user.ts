@@ -7,8 +7,8 @@ import { EmailVerificationToken } from "#/models/emailVerificationToken.model";
 import { isValidObjectId } from "mongoose";
 import { PasswordResetToken } from "#/models/passwordresetToken";
 import crypto from "crypto";
-import { PASSWORD_RESET_LINK } from "#/utils/variables";
-import { error } from "console";
+import { JWT_SECRET, PASSWORD_RESET_LINK } from "#/utils/variables";
+import jwt from "jsonwebtoken";
 
 export const create: RequestHandler = async (req: CreateUser, res: Response) => {
     const { name, email, password } = req.body;
@@ -156,3 +156,37 @@ export const updatepassword: RequestHandler = async (req: VerifyEmailRequest, re
   }
 } 
 
+export const signIn: RequestHandler = async (req, res) => {
+  const { password, email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if(!user) return res.status(403).json({
+    error: "Email or Password is invalid!"
+  });
+
+  // Compare the password
+  const matched = await user.comparePassword(password);
+  if(!matched) return res.status(403).json({
+    error: "Email or Password is Invalid!"
+  });
+
+  // generate JWT token
+  const token = jwt.sign({ userId: user._id }, JWT_SECRET, {});
+  
+  user.tokens.push(token);
+  await user.save();
+
+  res.json({
+    profile: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      verified: user.verified,
+      avatar: user.avatar?.url,
+      followers: user.followers?.length,
+      following: user.followings?.length
+    },
+    token
+  });
+}
