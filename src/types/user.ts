@@ -11,7 +11,8 @@ declare global {
           avatar?: string,
           followers: number,
           following: number
-        }
+        };
+        token?: string
       }
     }
   }

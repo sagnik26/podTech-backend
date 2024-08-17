@@ -10,7 +10,8 @@ import {
     updatepassword, 
     signIn, 
     updateProfile, 
-    sendProfile 
+    sendProfile, 
+    logOut
 } from "#/controllers/auth";
 import { isValidPasswordresetToken, mustAuth } from "#/middleware/auth";
 import fileParser from "#/middleware/fileParser";
@@ -48,5 +49,7 @@ router.post(
 router.get('/is-auth', mustAuth, sendProfile);
 
 router.post('/update-profile', mustAuth, fileParser, updateProfile);
+
+router.post("/log-out", mustAuth, logOut);
 
 export default router;
