@@ -2,6 +2,7 @@ import { PasswordResetToken } from "#/models/passwordresetToken";
 import { User } from "#/models/user.model";
 import { VerifyEmailRequest } from "#/types/user";
 import { JWT_SECRET } from "#/utils/variables";
+import { error } from "console";
 import { RequestHandler, Response } from "express";
 import { JwtPayload, verify } from "jsonwebtoken";
 
@@ -60,3 +61,14 @@ export const mustAuth: RequestHandler = async (req, res, next) => {
 
     next();
 }
+
+export const isVerified: RequestHandler = (req, res, next) => {
+  if(!req.user.verified) {
+    return res.status(403).json({
+      error: "Please verify your email account!"
+    });
+  }
+
+  next();
+}
+
