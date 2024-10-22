@@ -73,4 +73,35 @@ export const AudioValidationSchema = yup.object({
         category: yup.string().oneOf(categories, "Invalid category!").required("category is missing!")
 });
 
+/*
+*** while creating playlist, there can be request with new playlist name and 
+    audio that the user wants to store inside that playlist.
+*** Or, the user wants to create an empty playlist.
+*/
+export const NewPlaylistValidationSchema = yup.object({
+        title: yup.string().required("Title is missing!"),
+        resId: yup.string().transform(function(value) {
+           return this.isType(value) && isValidObjectId(value) ? value : "";
+        }),
+        visibility: yup
+                .string()
+                .oneOf(["public", "private"], "Visibility must be public or private!")
+                .required("Visibility is missing!")
+});
+
+export const OldPlaylistValidationSchema = yup.object({
+        title: yup.string().required("Title is missing!"),
+        // this is going to validate the audio id
+        item: yup.string().transform(function(value) {
+           return this.isType(value) && isValidObjectId(value) ? value : "";
+        }),
+        // this is going to validate the playlist id
+        id: yup.string().transform(function(value) {
+                return this.isType(value) && isValidObjectId(value) ? value : "";
+        }),
+        visibility: yup
+                .string()
+                .oneOf(["public", "private"], "Visibility must be public or private!")
+});
+
 
