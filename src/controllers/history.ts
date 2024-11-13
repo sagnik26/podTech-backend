@@ -224,6 +224,6 @@ export const getRecentlyPlayed: RequestHandler = async (req, res) => {
         }
     ]);
 
-    res.json({ audios   });
+    res.json({ audios });
 }
 

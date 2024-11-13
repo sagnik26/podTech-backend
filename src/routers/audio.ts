@@ -3,7 +3,7 @@ import fileParser from "#/middleware/fileParser";
 import { validate } from "#/middleware/validator";
 import { AudioValidationSchema } from "#/utils/validationSchema";
 import { Router } from "express";
-import { createAudio, updateAudio } from "#/controllers/audio";
+import { createAudio, getLatestUploads, updateAudio } from "#/controllers/audio";
 import { isVerified } from "#/middleware/auth";
 
 const router = Router();
@@ -24,6 +24,7 @@ router.patch("/:audioId",
     updateAudio
 );
 
+router.get("/latest", getLatestUploads);
 
 export default router;
 
